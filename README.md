@@ -27,6 +27,21 @@
 
 <br/>
 
+## Managed owner checkout
+
+The maintained Bun checkout keeps its source/fork maintenance in four small
+owner entrypoints:
+
+```bash
+./audit.sh      # report upstream/fork, Bun, build, and no-idle state
+./integrate.sh  # install, build, and diagnose without starting the browser
+./doctor.sh     # read-only source/build/runtime-contract checks
+./update.sh     # reconcile, verify, prepare a local commit, and print push
+```
+
+They delegate reusable Git and dependency mechanics to Sandwich. No script
+pushes, rebases, stashes, starts a browser, or copies its policy into Diogenes.
+
 ```bash
 git clone https://github.com/jo-inc/camofox-browser && cd camofox-browser
 npm install && npm start

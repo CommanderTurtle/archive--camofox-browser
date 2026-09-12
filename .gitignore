@@ -12,6 +12,7 @@ npm-debug.log*
 *.pid
 *.seed
 *.pid.lock
+/start.sh
 
 # Coverage
 coverage/
