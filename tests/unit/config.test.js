@@ -82,6 +82,22 @@ describe('loadConfig', () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
+  test('reads browser idle timeout from config and lets the environment override it', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'camofox-config-'));
+    const configPath = path.join(dir, 'camofox.config.json');
+
+    delete process.env.BROWSER_IDLE_TIMEOUT_MS;
+    fs.writeFileSync(configPath, JSON.stringify({ browserIdleTimeoutMs: 0 }));
+    expect(loadConfig({ configPath }).browserIdleTimeoutMs).toBe(0);
+
+    process.env.BROWSER_IDLE_TIMEOUT_MS = '45000';
+    expect(loadConfig({ configPath }).browserIdleTimeoutMs).toBe(45000);
+
+    process.env.BROWSER_IDLE_TIMEOUT_MS = '-1';
+    expect(loadConfig({ configPath }).browserIdleTimeoutMs).toBe(300000);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
   test('enables desktop interactive mode from the environment and forwards it to server subprocesses', () => {
     process.env.CAMOFOX_INTERACTIVE = 'desktop';
 

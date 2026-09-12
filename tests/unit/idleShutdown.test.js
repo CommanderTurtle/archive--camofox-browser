@@ -10,7 +10,7 @@ function createIdleShutdownScheduler({ getSessionsSize, hasBrowser, closeBrowser
   let browserIdleTimer = null;
 
   function scheduleBrowserIdleShutdown(timeoutMs) {
-    if (browserIdleTimer || getSessionsSize() > 0 || !hasBrowser()) return;
+    if (timeoutMs <= 0 || browserIdleTimer || getSessionsSize() > 0 || !hasBrowser()) return;
     browserIdleTimer = setTimeoutFn(async () => {
       browserIdleTimer = null;
       if (getSessionsSize() === 0 && hasBrowser()) {
@@ -101,6 +101,22 @@ describe('idle browser shutdown scheduler', () => {
     browserAlive = false;
     scheduler.scheduleBrowserIdleShutdown(300_000);
     expect(scheduler.hasTimer).toBe(false);
+  });
+
+  test('zero disables idle shutdown without creating an immediate timer', () => {
+    let setTimeoutCalls = 0;
+    const scheduler = createIdleShutdownScheduler({
+      getSessionsSize: () => 0,
+      hasBrowser: () => true,
+      closeBrowser: () => {},
+      setTimeoutFn: () => { setTimeoutCalls++; return setTimeoutCalls; },
+      clearTimeoutFn: () => {},
+    });
+
+    scheduler.scheduleBrowserIdleShutdown(0);
+
+    expect(scheduler.hasTimer).toBe(false);
+    expect(setTimeoutCalls).toBe(0);
   });
 
   test('clearing the timer allows a later idle period to schedule once', () => {
