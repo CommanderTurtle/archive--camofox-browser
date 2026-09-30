@@ -42,6 +42,37 @@ describe('loadConfig', () => {
     expect(loadConfig().camoufoxExecutablePath).toBe('/legacy/camoufox');
   });
 
+  test('validates the configured proxy protocol', () => {
+    process.env.PROXY_PROTOCOL = 'socks5';
+    expect(loadConfig().proxy.protocol).toBe('socks5');
+
+    process.env.PROXY_PROTOCOL = 'ftp';
+    expect(() => loadConfig()).toThrow('PROXY_PROTOCOL must be http, https, socks4, or socks5');
+  });
+
+  test('configures an optional direct browser identity and forwards it to subprocesses', () => {
+    process.env.CAMOFOX_LOCALE = 'en-AU';
+    process.env.CAMOFOX_TIMEZONE = 'Australia/Sydney';
+
+    const config = loadConfig();
+
+    expect(config.directIdentity).toEqual({ locale: 'en-AU', timezoneId: 'Australia/Sydney' });
+    expect(config.serverEnv.CAMOFOX_LOCALE).toBe('en-AU');
+    expect(config.serverEnv.CAMOFOX_TIMEZONE).toBe('Australia/Sydney');
+  });
+
+  test('does not set a direct browser identity unless both values are configured', () => {
+    delete process.env.CAMOFOX_LOCALE;
+    delete process.env.CAMOFOX_TIMEZONE;
+    expect(loadConfig().directIdentity).toBeNull();
+
+    process.env.CAMOFOX_LOCALE = 'en-AU';
+    expect(() => loadConfig()).toThrow('CAMOFOX_LOCALE and CAMOFOX_TIMEZONE must be set together');
+
+    process.env.CAMOFOX_TIMEZONE = 'Not/A_Timezone';
+    expect(() => loadConfig()).toThrow('CAMOFOX_TIMEZONE must be a valid IANA timezone');
+  });
+
   test('configures and forwards the upload directory', () => {
     process.env.CAMOFOX_UPLOADS_DIR = '/mounted/uploads';
 
@@ -111,6 +142,22 @@ describe('loadConfig', () => {
     fs.writeFileSync(configPath, JSON.stringify({ newPageTimeoutMs: 0 }));
     expect(loadConfig({ configPath }).newPageTimeoutMs).toBe(10000);
 
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  test('reads browser idle timeout from config and lets the environment override it', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'camofox-config-'));
+    const configPath = path.join(dir, 'camofox.config.json');
+
+    delete process.env.BROWSER_IDLE_TIMEOUT_MS;
+    fs.writeFileSync(configPath, JSON.stringify({ browserIdleTimeoutMs: 0 }));
+    expect(loadConfig({ configPath }).browserIdleTimeoutMs).toBe(0);
+
+    process.env.BROWSER_IDLE_TIMEOUT_MS = '45000';
+    expect(loadConfig({ configPath }).browserIdleTimeoutMs).toBe(45000);
+
+    process.env.BROWSER_IDLE_TIMEOUT_MS = '-1';
+    expect(loadConfig({ configPath }).browserIdleTimeoutMs).toBe(300000);
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
