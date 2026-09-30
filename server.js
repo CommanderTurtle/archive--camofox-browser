@@ -3885,6 +3885,14 @@ app.post('/tabs/:tabId/click', async (req, res) => {
       const remainingBudget = () => Math.max(0, HANDLER_TIMEOUT_MS - 2000 - (Date.now() - clickStart));
       // Full mouse event sequence for stubborn JS click handlers (mirrors Swift WebView.swift)
       // Dispatches: mouseover -> mouseenter -> mousedown -> mouseup -> click
+      const dispatchDomClick = async (locator) => {
+        await locator.evaluate((element) => {
+          if (!(element instanceof HTMLElement)) throw new Error('Element is not an HTMLElement');
+          element.click();
+        });
+        log('info', 'DOM click dispatched after Playwright click failure');
+      };
+
       const dispatchMouseSequence = async (locator) => {
         // boundingBox() with no timeout inherits Playwright's 30s default, which
         // silently eats the entire handler budget when the element detached after
@@ -3920,6 +3928,15 @@ app.post('/tabs/:tabId/click', async (req, res) => {
         log('info', 'mouse sequence dispatched', { x: x.toFixed(0), y: y.toFixed(0) });
       };
       
+      const recoverForceClickFailure = async (locator) => {
+        try {
+          await dispatchDomClick(locator);
+        } catch (domErr) {
+          log('warn', 'DOM click fallback failed, trying mouse sequence', { error: domErr.message });
+          await dispatchMouseSequence(locator);
+        }
+      };
+
       // On Google SERPs, skip the normal click attempt (always intercepted by overlays)
       // and go directly to force click -- saves 5s timeout per click
       const onGoogleSerp = isGoogleSerp(tabState.page.url());
@@ -3944,8 +3961,8 @@ app.post('/tabs/:tabId/click', async (req, res) => {
           try {
             await click({ timeout: 3000, force: true });
           } catch (forceErr) {
-            log('warn', 'google force click failed, trying mouse sequence');
-            await dispatchMouseSequence(locator);
+            log('warn', 'google force click failed, trying DOM click fallback');
+            await recoverForceClickFailure(locator);
           }
           return;
         }
@@ -3960,14 +3977,17 @@ app.post('/tabs/:tabId/click', async (req, res) => {
             try {
               await click({ timeout: 3000, force: true });
             } catch (forceErr) {
-              // Fallback 2: Full mouse event sequence for stubborn JS handlers
-              log('warn', 'force click failed, trying mouse sequence');
-              await dispatchMouseSequence(locator);
+              log('warn', 'force click failed, trying DOM click fallback');
+              await recoverForceClickFailure(locator);
             }
           } else if (err.message.includes('not visible') || err.message.toLowerCase().includes('timeout')) {
-            // Fallback 2: Element not responding to click, try mouse sequence
-            log('warn', 'click timeout, trying mouse sequence');
-            await dispatchMouseSequence(locator);
+            log('warn', 'click timeout, retrying with force');
+            try {
+              await click({ timeout: Math.max(1, Math.min(3000, remainingBudget())), force: true });
+            } catch (forceErr) {
+              log('warn', 'force click failed, trying DOM click fallback');
+              await recoverForceClickFailure(locator);
+            }
           } else {
             throw err;
           }
