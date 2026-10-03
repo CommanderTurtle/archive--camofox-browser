@@ -8,25 +8,31 @@
         "better-sqlite3": "13.0.1",
         "camoufox-js": "0.11.5",
         "express": "^5.2.1",
-        "playwright-core": "^1.58.0",
+        "playwright-core": "^1.63.0",
         "prom-client": "^15.1.3",
-        "swagger-jsdoc": "^6.2.8",
+        "swagger-jsdoc": "^6.3.0",
       },
       "devDependencies": {
-        "@types/node": "^22.0.0",
-        "jest": "^30.4.2",
+        "@types/node": "^22.20.2",
+        "jest": "^30.5.1",
         "pngjs": "^7.0.0",
-        "typescript": "^5.7.0",
+        "typescript": "^5.9.3",
       },
       "optionalDependencies": {
         "@modelcontextprotocol/sdk": "^1.30.0",
       },
+      "peerDependencies": {
+        "openclaw": ">=2026.9.4",
+      },
+      "optionalPeers": [
+        "openclaw",
+      ],
     },
   },
   "overrides": {
     "adm-zip": "0.6.1",
-    "fast-uri": "3.1.7",
-    "hono": "4.13.5",
+    "fast-uri": "3.1.8",
+    "hono": "4.13.7",
     "qs": "6.16.0",
   },
   "packages": {
@@ -458,7 +464,7 @@
 
     "fast-json-stable-stringify": ["fast-json-stable-stringify@2.1.0", "", {}, "sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw=="],
 
-    "fast-uri": ["fast-uri@3.1.7", "", {}, "sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg=="],
+    "fast-uri": ["fast-uri@3.1.8", "", {}, "sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg=="],
 
     "fb-watchman": ["fb-watchman@2.0.2", "", { "dependencies": { "bser": "2.1.1" } }, "sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA=="],
 
@@ -506,7 +512,7 @@
 
     "header-generator": ["header-generator@2.1.86", "", { "dependencies": { "browserslist": "^4.21.1", "generative-bayesian-network": "2.1.86", "ow": "^0.28.1", "tslib": "^2.4.0" } }, "sha512-Nj+glwXBEU3PvvAT1WiC3FBhX1ReZZY+ADXIo2iTRqMzamLW0olJk7q/EJ6N3qJBqQWZJDJonAJRtAlzEFynLQ=="],
 
-    "hono": ["hono@4.13.5", "", {}, "sha512-O6+/eCYRkzzzy0rPWwKLiGBR1nFuUPZynnwjxN1MBA62NNqbT0wQEzQyK2gSO5yDIDB336sXQleAhOHrzlYyKw=="],
+    "hono": ["hono@4.13.7", "", {}, "sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ=="],
 
     "html-escaper": ["html-escaper@2.0.2", "", {}, "sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg=="],
 
