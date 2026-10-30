@@ -4,6 +4,11 @@
  * Provides browser automation tools using the Camoufox anti-detection browser.
  * Server auto-starts when plugin loads (configurable via autoStart: false).
  */
+// `openclaw` is an optional peer (not installed by `bun install`), so this
+// type-only import is commented out to keep `tsc -p .` clean; the usages
+// below fall back to implicit `any` (tsconfig noImplicitAny: false).
+// To type-check against the real SDK: `bun add -d openclaw` and restore.
+// import type { OpenClawPluginApi, OpenClawPluginToolContext } from "openclaw/plugin-sdk/core";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { randomUUID } from "crypto";

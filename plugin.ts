@@ -6,7 +6,11 @@
  */
 
 import type { ChildProcess } from "child_process";
-import type { OpenClawPluginApi, OpenClawPluginToolContext } from "openclaw/plugin-sdk/core";
+// `openclaw` is an optional peer (not installed by `bun install`), so this
+// type-only import is commented out to keep `tsc -p .` clean; the usages
+// below fall back to implicit `any` (tsconfig noImplicitAny: false).
+// To type-check against the real SDK: `bun add -d openclaw` and restore.
+// import type { OpenClawPluginApi, OpenClawPluginToolContext } from "openclaw/plugin-sdk/core";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { randomUUID } from "crypto";
@@ -49,7 +53,7 @@ let serverProcess: ChildProcess | null = null;
 async function startServer(
   pluginDir: string,
   port: number,
-  log: OpenClawPluginApi["logger"],
+  log,
   pluginCfg?: PluginConfig
 ): Promise<ChildProcess> {
   const cfg = loadConfig();
@@ -124,7 +128,7 @@ async function fetchApi(
   return res.json();
 }
 
-export default function register(api: OpenClawPluginApi) {
+export default function register(api) {
   const cfg = (api.pluginConfig ?? api.config) as unknown as PluginConfig;
   const port = cfg.port || 9377;
   const baseUrl = cfg.url || `http://localhost:${port}`;
@@ -154,7 +158,7 @@ export default function register(api: OpenClawPluginApi) {
   // imports — so the OpenClaw plugin and the MCP server behave identically and
   // cannot drift. Only the userId/sessionKey source (OpenClaw ctx) differs.
   for (const def of TOOL_DEFS) {
-    api.registerTool((ctx: OpenClawPluginToolContext) => ({
+    api.registerTool((ctx) => ({
       name: def.name,
       label: def.name,
       description: def.description,
